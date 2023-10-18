@@ -2953,6 +2953,10 @@ void Aura::HandleAuraModIncreaseSpeed(bool /*apply*/, bool Real)
     if (!Real)
         return;
 
+    if (Unit* caster = GetCaster())
+        if (Player* modOwner = caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(GetSpellProto()->Id, SPELLMOD_SPEED, m_modifier.m_amount);
+
     GetTarget()->UpdateSpeed(MOVE_RUN, true);
 }
 
@@ -2979,6 +2983,10 @@ void Aura::HandleAuraModDecreaseSpeed(bool /*apply*/, bool Real)
     // all applied/removed only at real aura add/remove
     if (!Real)
         return;
+
+    if (Unit* caster = GetCaster())
+        if (Player* modOwner = caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(GetSpellProto()->Id, SPELLMOD_SPEED, m_modifier.m_amount);
 
     Unit* target = GetTarget();
 
@@ -3983,6 +3991,10 @@ void Aura::HandleModCastingSpeed(bool apply, bool /*Real*/)
 {
     float amount = m_modifier.m_amount;
 
+    if (Unit* caster = GetCaster())
+        if (Player* modOwner = caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(GetSpellProto()->Id, SPELLMOD_HASTE, amount);
+
     GetTarget()->ApplyCastTimePercentMod(amount, apply);
 }
 
@@ -3990,12 +4002,20 @@ void Aura::HandleModAttackSpeed(bool apply, bool /*Real*/)
 {
     float amount = m_modifier.m_amount;
 
+    if (Unit* caster = GetCaster())
+        if (Player* modOwner = caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(GetSpellProto()->Id, SPELLMOD_HASTE, amount);
+
     GetTarget()->ApplyAttackTimePercentMod(BASE_ATTACK, amount, apply);
 }
 
 void Aura::HandleModMeleeSpeedPct(bool apply, bool /*Real*/)
 {
     float amount = m_modifier.m_amount;
+
+    if (Unit* caster = GetCaster())
+        if (Player* modOwner = caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(GetSpellProto()->Id, SPELLMOD_HASTE, amount);
 
     Unit* target = GetTarget();
     target->ApplyAttackTimePercentMod(BASE_ATTACK, amount, apply);
@@ -4006,6 +4026,10 @@ void Aura::HandleAuraModRangedHaste(bool apply, bool /*Real*/)
 {
     float amount = m_modifier.m_amount;
 
+    if (Unit* caster = GetCaster())
+        if (Player* modOwner = caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(GetSpellProto()->Id, SPELLMOD_HASTE, amount);
+
     GetTarget()->ApplyAttackTimePercentMod(RANGED_ATTACK, amount, apply);
 }
 
@@ -4015,6 +4039,10 @@ void Aura::HandleRangedAmmoHaste(bool apply, bool /*Real*/)
         return;
 
     float amount = m_modifier.m_amount;
+
+    if (Unit* caster = GetCaster())
+        if (Player* modOwner = caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(GetSpellProto()->Id, SPELLMOD_HASTE, amount);
 
     GetTarget()->ApplyAttackTimePercentMod(RANGED_ATTACK, amount, apply);
 }
@@ -4027,6 +4055,10 @@ void Aura::HandleAuraModAttackPower(bool apply, bool /*Real*/)
 {
     float amount = m_modifier.m_amount;
 
+    if (Unit* caster = GetCaster())
+        if (Player* modOwner = caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(GetSpellProto()->Id, SPELLMOD_ATTACK_POWER, amount);
+
     GetTarget()->HandleStatModifier(UNIT_MOD_ATTACK_POWER, TOTAL_VALUE, amount, apply);
 }
 
@@ -4037,12 +4069,20 @@ void Aura::HandleAuraModRangedAttackPower(bool apply, bool /*Real*/)
 
     float amount = m_modifier.m_amount;
 
+    if (Unit* caster = GetCaster())
+        if (Player* modOwner = caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(GetSpellProto()->Id, SPELLMOD_ATTACK_POWER, amount);
+
     GetTarget()->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_VALUE, amount, apply);
 }
 
 void Aura::HandleAuraModAttackPowerPercent(bool apply, bool /*Real*/)
 {
     float amount = m_modifier.m_amount;
+
+    if (Unit* caster = GetCaster())
+        if (Player* modOwner = caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(GetSpellProto()->Id, SPELLMOD_ATTACK_POWER, amount);
 
     // UNIT_FIELD_ATTACK_POWER_MULTIPLIER = multiplier - 1
     GetTarget()->HandleStatModifier(UNIT_MOD_ATTACK_POWER, TOTAL_PCT, amount, apply);
@@ -4054,6 +4094,10 @@ void Aura::HandleAuraModRangedAttackPowerPercent(bool apply, bool /*Real*/)
         return;
 
     float amount = m_modifier.m_amount;
+
+    if (Unit* caster = GetCaster())
+        if (Player* modOwner = caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(GetSpellProto()->Id, SPELLMOD_ATTACK_POWER, amount);
 
     // UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER = multiplier - 1
     GetTarget()->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_PCT, amount, apply);
@@ -6094,35 +6138,6 @@ uint32 Aura::CalculateAuraEffectValue(Unit* caster, Unit* target, SpellEntry con
 
                 value += (int32)DoneActualBenefit;
             }
-            return value;
-        }
-        case SPELL_AURA_MOD_DECREASE_SPEED:
-        case SPELL_AURA_MOD_INCREASE_SPEED:
-        {
-            if (caster)
-                if (Player* modOwner = caster->GetSpellModOwner())
-                    modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_SPEED, value);
-            return value;
-        }
-        case SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK:
-        case SPELL_AURA_MOD_ATTACKSPEED:
-        case SPELL_AURA_MOD_MELEE_HASTE:
-        case SPELL_AURA_MOD_RANGED_HASTE:
-        case SPELL_AURA_MOD_RANGED_AMMO_HASTE:
-        {
-            if (caster)
-                if (Player* modOwner = caster->GetSpellModOwner())
-                    modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_HASTE, value);
-            return value;
-        }
-        case SPELL_AURA_MOD_ATTACK_POWER:
-        case SPELL_AURA_MOD_ATTACK_POWER_PCT:
-        case SPELL_AURA_MOD_RANGED_ATTACK_POWER:
-        case SPELL_AURA_MOD_RANGED_ATTACK_POWER_PCT:
-        {
-            if (caster)
-                if (Player* modOwner = caster->GetSpellModOwner())
-                    modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_ATTACK_POWER, value);
             return value;
         }
     }
