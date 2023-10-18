@@ -6140,6 +6140,35 @@ uint32 Aura::CalculateAuraEffectValue(Unit* caster, Unit* target, SpellEntry con
             }
             return value;
         }
+        case SPELL_AURA_MOD_DECREASE_SPEED:
+        case SPELL_AURA_MOD_INCREASE_SPEED:
+        {
+            if (caster)
+                if (Player* modOwner = caster->GetSpellModOwner())
+                    modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_SPEED, value);
+            return value;
+        }
+        case SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK:
+        case SPELL_AURA_MOD_ATTACKSPEED:
+        case SPELL_AURA_MOD_MELEE_HASTE:
+        case SPELL_AURA_MOD_RANGED_HASTE:
+        case SPELL_AURA_MOD_RANGED_AMMO_HASTE:
+        {
+            if (caster)
+                if (Player* modOwner = caster->GetSpellModOwner())
+                    modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_HASTE, value);
+            return value;
+        }
+        case SPELL_AURA_MOD_ATTACK_POWER:
+        case SPELL_AURA_MOD_ATTACK_POWER_PCT:
+        case SPELL_AURA_MOD_RANGED_ATTACK_POWER:
+        case SPELL_AURA_MOD_RANGED_ATTACK_POWER_PCT:
+        {
+            if (caster)
+                if (Player* modOwner = caster->GetSpellModOwner())
+                    modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_ATTACK_POWER, value);
+            return value;
+        }
     }
     return value;
 }
